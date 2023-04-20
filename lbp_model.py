@@ -28,6 +28,7 @@ class LBPModel(Model):
         self.__radius = radius
         # 测试集,训练集的lbp和图像位置下标
         self.train_lbp_list, self.test_lbp_list, self.train_num_list, self.test_num_list = [], [], [], []
+        self.__distance_list = []  # 30 * 9
         # 图像的lbp值
         self.lbp_list = None
         self.lbp_score_list = None
@@ -35,42 +36,34 @@ class LBPModel(Model):
 
     def compute(self):
         """
-        计算所有数据集的lbp值
+        计算所有数据集的lbp值, 然后算出后面9列对第一列的距离, 并用sigmoid进行归一化
         :return: None
         """
-        self.lbp_list = [local_binary_pattern(self.read_img(img_index), self.__n_points, self.__radius,
-                                              method='ror') for img_index in self.dataset]
+        # 存储第一列的lbp, 方便后面的数据集和它进行比较
+        lbp1_list = [local_binary_pattern(self.read_img(col_1), self.__n_points, self.__radius, method='ror') for col_1
+                     in self.dataset[:, 0]]
+        # 计算后9列到第1列的距离, 30 * 9 * 30
+        for cols in self.dataset[:, 1:]:
+            for col in cols:
+                lbp2 = local_binary_pattern(self.read_img(col), self.__n_points, self.__radius, method='ror')
+                # 先计算lbp的欧式距离, 然后经过sigmoid输出为[0,1]之间的数
+                rows = [self.sigmoid(np.linalg.norm(lbp - lbp2)) for lbp in lbp1_list]
+                self.__distance_list.append(rows)
+
+    def predict(self):
+        distances = np.array(self.__distance_list)
+        ...
 
     def split_dataset(self):
         """
-        按照3: 2, 分割数据集
+        一个类别10张图片, 用1, 2列作为训练样本, 后8列作为测试样本, 分割数据
         :return: None
         """
-        for i in range(0, 100, 5):
-            self.train_num_list.extend(self.dataset[i:i + 3])
-            self.test_num_list.extend(self.dataset[i + 3:i + 5])
-            self.train_lbp_list.extend(self.lbp_list[i:i + 3])
-            self.test_lbp_list.extend(self.lbp_list[i + 3: i + 5])
+        for i in range(0, self.img_nums + 1, 10):
+            ...
 
     def get_real_label(self):
-        for train_index in self.train_num_list:
-            self.real_labels.extend(
-                [1 if train_index // 10 == test_index // 10 else 0 for test_index in self.test_num_list])
-
-    def compute_distance(self):
-        """
-        通过F范数计算距离即欧式距离, 并归一化
-        :return: None
-        """
-        distance_lbp_list = []
-        for train_lbp in self.train_lbp_list:
-            for test_lbp in self.test_lbp_list:
-                distance_lbp_list.append(np.linalg.norm(train_lbp - test_lbp))
-        # 归一化处理
-        d_min = np.min(distance_lbp_list)
-        d_max = np.max(distance_lbp_list)
-        d_d = d_max - d_min
-        self.lbp_score_list = [1 - (distance - d_min) / d_d for distance in distance_lbp_list]
+        ...
 
     def plot(self):
         fpr_lbp, tpr_lbp, thread_lbp = roc_curve(self.real_labels, self.lbp_score_list)

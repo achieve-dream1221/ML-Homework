@@ -4,8 +4,6 @@
 # @Author  : achieve_dream
 # @File    : model.py
 # @Software: Pycharm
-from random import sample
-
 import cv2
 import numpy as np
 from abc import ABC, abstractmethod
@@ -22,25 +20,28 @@ class Model(ABC):
         :param img_nums: 加载图片的数量
         """
         self.dataset = self.pure_load_dataset(img_nums)
+        self.img_nums = img_nums
 
     @staticmethod
-    def pure_load_dataset(img_nums: int):
+    def pure_load_dataset(img_nums: int) -> np.ndarray:
         """
         只进行数字处理, 不进行IO操作
         :return: dataset(选取的图像的下标)
         """
-        # 对图像进行随机采样
-        result = []
-        for i in range(1, 301, 10):
-            samples = [samples for samples in
-                       sample(range(i, i + 10), k=5)]
-            result.extend(samples)
-        # return [i for i in range(1, img_nums + 1)]
-        return result
+        # return np.array([[i for i in range(j, j + 10)] for j in range(1, img_nums + 1, 10)])
+        return np.array([i for i in range(1, img_nums + 1)]).reshape(-1, 10)
 
     @staticmethod
     def read_img(img_index: int) -> np.ndarray:
         return cv2.imread("dataset/" + str(img_index).rjust(5, '0') + ".bmp", cv2.IMREAD_GRAYSCALE)
+
+    @staticmethod
+    def sigmoid(x):
+        return 1 / (1 + np.exp(-x))
+
+    @staticmethod
+    def softmax(xs, x):
+        return np.exp(x) / np.sum(np.exp(xs))
 
     @abstractmethod
     def compute(self, *args, **kwargs):
