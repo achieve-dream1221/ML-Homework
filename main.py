@@ -17,11 +17,11 @@ def plot():
     绘制图形
     :return: None
     """
-    target_labels = np.load("target_labels.npy")
-    lbp = np.load("lbp_predicts.npy")
-    pca = np.load("pca_predicts.npy")
-    haar = np.load("wave_predicts.npy")
-    gabor = np.load("gabor_predicts.npy")
+    target_labels = np.load("runs/target_labels.npy")
+    lbp = np.load("runs/lbp_predicts.npy")
+    pca = np.load("runs/pca_predicts.npy")
+    haar = np.load("runs/wave_predicts.npy")
+    gabor = np.load("runs/gabor_predicts.npy")
     predicts = zip([lbp, pca, haar, gabor], ['LBP', "PCA", "HAAR", "GABOR"])
     for predict, name in predicts:
         fpr, tpr, _ = roc_curve(target_labels, predict)
@@ -35,7 +35,7 @@ def plot():
     plt.ylabel('TPR')
     plt.title('ROC 曲线')
     plt.legend()
-    plt.savefig('ROC.svg')
+    plt.savefig('runs/ROC.svg')
     plt.show()
 
 

@@ -15,29 +15,35 @@
 >
 >> > 000003.bmp
 
+# 说明
+
+1. `main.py`用于将所有算法的数据绘制到一张图像上
+2. `model.py`分离出Model类, 统一了绘制ROC接口, 初始化加载数据集, 计算softmax
+3. 运行不同算法, 只需运行对应的`*_model.py`文件
+
 ## LBP算法
 
 > 准确率: 0.88
 
-![](lbp_roc.svg)
+![](runs/lbp_roc.svg)
 
 ## PCA算法
 
 > 准确率: 0.52
 
-![](pca_roc.svg)
+![](runs/pca_roc.svg)
 
 ## Haar小波变换
 
 > 准确率: 0.59
 
-![](wave_roc.svg)
+![](runs/wave_roc.svg)
 
 ## Gabor变换
 
 > 准确率: 0.80
 
-![](gabor_roc.svg)
+![](runs/gabor_roc.svg)
 
 # 算法对比
 
@@ -48,4 +54,4 @@
 | Haar  | 0.59 |
 | Gabor | 0.80 |
 
-![](ROC.svg)
+![](runs/ROC.svg)

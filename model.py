@@ -80,5 +80,5 @@ class Model(ABC):
         plt.ylabel('TPR')
         plt.title(f'{file_name.upper()} 曲线')
         plt.legend()
-        plt.savefig(f'{file_name}.svg')
+        plt.savefig(f'runs/{file_name}.svg')
         plt.show()
