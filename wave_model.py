@@ -22,7 +22,7 @@ class HaarWaveModel(Model):
         计算所有数据集的lbp值, 然后算出后面9列对第一列的距离, 并用sigmoid进行归一化
         :return: None
         """
-        # 存储第一列的lbp, 方便后面的数据集和它进行比较
+        # 存储第一列的harr, 方便后面的数据集和它进行比较
         haar1_list = [self.compute_haar(col_1) for col_1 in self.dataset[:, 0]]
         predicts = []
         target_labels = []
