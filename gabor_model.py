@@ -1,19 +1,27 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-# @Time    : 2023/4/19 18:47
+# @Time    : 2023/4/20 17:13
 # @Author  : achieve_dream
-# @File    : pca_model.py
+# @File    : gabor_model.py
 # @Software: Pycharm
+import cv2
 import numpy as np
 
 from model import Model
-from sklearn.decomposition import PCA
 
 
-class PCAModel(Model):
+class GaborModel(Model):
     def compute(self):
-        pca = PCA()
-        pca1_list = [pca.fit_transform(self.read_img(col_1)) for col_1 in self.dataset[:, 0]]
+        # 存储第一列的gabor, 方便后面的数据集和它进行比较
+        k_size = 31  # 滤波器大小
+        sigma = 5  # 高斯核标准差
+        theta = np.pi / 4  # 方向
+        lambd = 10  # 波长
+        gamma = 0.5  # 空间纵横比
+        phi = 0.5  # 相位偏移
+        # 计算Gabor滤波器的卷积核
+        kernel = cv2.getGaborKernel((k_size, k_size), sigma, theta, lambd, gamma, phi)
+        gabor1_list = [cv2.filter2D(self.read_img(col_1), cv2.CV_32F, kernel) for col_1 in self.dataset[:, 0]]
         predicts = []
         target_labels = []
         # 预测正确的个数
@@ -28,9 +36,9 @@ class PCAModel(Model):
             # 展开为一行
             target_labels.extend(target_labels_rows)
             for col in cols:  # 9 列
-                pca2 = pca.fit_transform(self.read_img(col))
+                gabor2 = cv2.filter2D(self.read_img(col), cv2.CV_32F, kernel)
                 # 先计算lbp的欧式距离, 然后通过softmax预测出这10个类别的概率
-                predict_scores = self.softmax(np.array([np.linalg.norm(pca - pca2) for pca in pca1_list]))
+                predict_scores = self.softmax(np.array([np.linalg.norm(gabor - gabor2) for gabor in gabor1_list]))
                 # 概率最大值的下标即分类标签
                 if predict_scores.argmax() == row_index:
                     positive_nums += 1
@@ -41,12 +49,12 @@ class PCAModel(Model):
 
     def run(self):
         targets, predicts, accuracy = self.compute()
-        print(f"PCA准确率: {round(accuracy, 2)}")
+        print(f"Gabor准确率: {round(accuracy, 2)}")
         np.save("target_labels", targets)
-        np.save("pca_predicts", predicts)
-        self.plot(targets, predicts, "pca_roc")
+        np.save("gabor_predicts", predicts)
+        self.plot(targets, predicts, "gabor_roc")
 
 
 if __name__ == '__main__':
-    model = PCAModel(img_nums=300)
+    model = GaborModel(img_nums=300)
     model.run()

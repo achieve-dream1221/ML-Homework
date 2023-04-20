@@ -25,6 +25,7 @@ class Model(ABC):
         构造方法, 初始化
         :param img_nums: 加载图片的数量
         """
+        assert (img_nums % 10 == 0) and (img_nums > 10), "图片数量必须大于10, 并且为10的整数倍"
         self.dataset = self.pure_load_dataset(img_nums)
         self.img_nums = img_nums
 
@@ -55,29 +56,29 @@ class Model(ABC):
         return e_x / e_x.sum(axis=0)
 
     @abstractmethod
-    def compute(self, *args, **kwargs):
+    def compute(self, *args, **kwargs) -> tuple[np.ndarray, np.ndarray, float]:
         """
         计算方法结果
-        :return: None
+        :return: 真实标签, 预测标签, 准确率
         """
         ...
 
-    def plot(self, target_labels: np.ndarray, predict_scores: np.ndarray):
+    @staticmethod
+    def plot(target_labels: np.ndarray, predict_scores: np.ndarray, file_name: str):
         """
         绘制图形
         :return: None
         """
-        ...
         fpr, tpr, _ = roc_curve(target_labels, predict_scores)
         # roc面积
         roc_auc = auc(fpr, tpr)
-        plt.plot(fpr, tpr, label='ROC 曲线 (面积 = %0.2f)' % roc_auc)
+        plt.plot(fpr, tpr, label=f'ROC 曲线 (面积 = {roc_auc:.2f})')
         plt.plot([0, 1], [0, 1])
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.0])
         plt.xlabel('FPR')
         plt.ylabel('TPR')
-        plt.title('ROC曲线')
+        plt.title(f'{file_name.upper()} 曲线')
         plt.legend()
-        plt.savefig('roc.svg')
+        plt.savefig(f'{file_name}.svg')
         plt.show()
