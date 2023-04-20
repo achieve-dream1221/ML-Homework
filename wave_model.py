@@ -5,7 +5,7 @@
 # @File    : wave_model.py
 # @Software: Pycharm
 import numpy as np
-from pywt import dwt2, idwt2, waverec2, wavedec2
+from pywt import waverec2, wavedec2
 
 from model import Model
 
